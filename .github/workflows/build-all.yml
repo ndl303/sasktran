@@ -143,35 +143,35 @@ jobs:
           name: docs
           path: pysasktran/docs/build/html
 
-  upload-docs-to-pages:
-    needs: build-docs
-    runs-on: ubuntu-latest
+  # upload-docs-to-pages:
+  #   needs: build-docs
+  #   runs-on: ubuntu-latest
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      contents: write      # to deploy to Pages
+  #   # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+  #   permissions:
+  #     contents: write      # to deploy to Pages
 
-    steps:
-      - name: Download doc artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: docs
-          path: docs
+  #   steps:
+  #     - name: Download doc artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: docs
+  #         path: docs
 
-      - name: Deploy dev docs
-        uses: peaceiris/actions-gh-pages@v3
-        if: (github.event_name == 'push') && (github.ref == 'refs/heads/main')
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
-          destination_dir: dev
+  #     - name: Deploy dev docs
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       if: (github.event_name == 'push') && (github.ref == 'refs/heads/main')
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: docs
+  #         destination_dir: dev
 
-      - name: Deploy release docs
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.event_name == 'release'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs
+  #     - name: Deploy release docs
+  #       uses: peaceiris/actions-gh-pages@v3
+  #       if: github.event_name == 'release'
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: docs
 
   build-cpp-wheels-mac:
     runs-on: macos-12
