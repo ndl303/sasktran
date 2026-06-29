@@ -55,7 +55,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download wheel artifacts 
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
           name: wheels-linux
@@ -63,7 +63,7 @@ jobs:
 
       - name: Test wheel
         run: bash buildscripts/test_sasktran_linux ${{ matrix.py_version }}
-  
+
   test-linux-wheel-system-python:
     needs: build-cpp-wheels-manylinux2014
     runs-on: ubuntu-latest
@@ -80,7 +80,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Download wheel artifacts 
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
           name: wheels-linux
@@ -91,7 +91,7 @@ jobs:
           python -m pip install -r pysasktran/requirements.txt
           python -m pip install sasktran --no-index -f wheelhouse/
           python -m pip install pytest xarray scipy zenodo_get netcdf4
-      
+
       - name: Import SASKTRAN
         run: |
           python -c "import sasktran"
@@ -112,14 +112,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Conda build environment 
+      - name: Setup Conda build environment
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: doc_env
           environment-file: pysasktran/docs/environment.yml
           auto-activate-base: false
 
-      - name: Download wheel artifacts 
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
           name: wheels-linux
@@ -142,7 +142,7 @@ jobs:
         with:
           name: docs
           path: pysasktran/docs/build/html
-      
+
   upload-docs-to-pages:
     needs: build-docs
     runs-on: ubuntu-latest
@@ -177,18 +177,18 @@ jobs:
     runs-on: macos-12
     env:
         BUILDPYTHONENV: "current"
-    
+
     strategy:
       matrix:
         py_version: [py310, py311, py312]
-        
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Conda build environment 
+      - name: Setup Conda build environment
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: build_${{ matrix.py_version }}
@@ -198,12 +198,12 @@ jobs:
 
       - name: Display conda environment
         shell: bash -el {0}
-        run: | 
+        run: |
           conda list
 
       - name: configure cmake project
         shell: bash -el {0}
-        run: | 
+        run: |
           cmake -S . -B build ${CMAKE_ARGS} -DPythonEnvironments="$BUILDPYTHONENV" -DCMAKE_BUILD_TYPE=Release -DFORCE_BOOST_STATIC=OFF
       - name: build cpp
         shell: bash -el {0}
@@ -211,7 +211,7 @@ jobs:
 
       - name: delocate wheels
         shell: bash -el {0}
-        run: | 
+        run: |
           cd wheelhouse
           ls
           find . -name "*x86_64.whl" -type f -exec delocate-listdeps --all '{}' \;
@@ -251,7 +251,7 @@ jobs:
 
       - name: Create Conda py311 Build Environment
         run: conda create -n py311 -c conda-forge python=3.11 numpy=2.0.0
-      
+
       - name: Create conda py312 Build Environment
         run: conda create -n py312 -c conda-forge python=3.12 numpy=2.0.0
 
@@ -321,9 +321,9 @@ jobs:
         with:
           name: wheels-windows
           path: wheelhouse
-  
+
   test-wheels-windows:
-    needs: build-cpp-wheels-windows 
+    needs: build-cpp-wheels-windows
     runs-on: windows-latest
     strategy:
       matrix:
@@ -334,21 +334,21 @@ jobs:
         with:
           auto-activate-base: true
           activate-environment: ""
-      
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download wheel artifacts 
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
           name: wheels-windows
           path: wheelhouse
-      
+
       - name: Test wheel
         run: ./buildscripts/test_sasktran_win.bat ${{ matrix.py_version }}
 
   test-wheels-mac:
-    needs: build-cpp-wheels-mac 
+    needs: build-cpp-wheels-mac
     runs-on: macos-latest
     continue-on-error: true
     strategy:
@@ -366,12 +366,12 @@ jobs:
           auto-activate-base: false
           miniconda-version: "latest"
 
-      - name: Download wheel artifacts 
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
           name: wheels-mac-${{ matrix.py_version }}
           path: wheelhouse
-      
+
       - name: Test wheel
         shell: bash -el {0}
         run: |
@@ -382,7 +382,7 @@ jobs:
           mkdir -p ~/.config/sasktran/ && cp ci/config.yml ~/.config/sasktran/
           python dummy_install.py > /dev/null 2>&1
           py.test sasktran
-  
+
   pycodestyle_check:
     runs-on: ubuntu-latest
     container: continuumio/anaconda3
@@ -396,49 +396,49 @@ jobs:
           pip install pycodestyle
           pycodestyle sasktran
 
-  upload-to-pypi:
-    needs: [test-wheels-linux, test-wheels-windows, test-linux-wheel-system-python, build-cpp-wheels-mac, build-docs]
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
+  # upload-to-pypi:
+  #   needs: [test-wheels-linux, test-wheels-windows, test-linux-wheel-system-python, build-cpp-wheels-mac, build-docs]
+  #   if: github.event_name == 'release'
+  #   runs-on: ubuntu-latest
 
-    environment:
-      name: pypi
-      url: https://pypi.org/p/sasktran
-    permissions:
-      id-token: write
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/p/sasktran
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      - name: Download linux wheel artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-linux
-          path: dist
+  #   steps:
+  #     - name: Download linux wheel artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-linux
+  #         path: dist
 
-      - name: Download windows wheel artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-windows
-          path: dist
+  #     - name: Download windows wheel artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-windows
+  #         path: dist
 
-      - name: Download mac wheel py310
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-mac-py310
-          path: dist
+  #     - name: Download mac wheel py310
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-mac-py310
+  #         path: dist
 
-      - name: Download mac wheel py311
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-mac-py311
-          path: dist
-      
-      - name: Download mac wheel py312
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-mac-py312
-          path: dist
+  #     - name: Download mac wheel py311
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-mac-py311
+  #         path: dist
 
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.8.7
-        with:
-          verbose: true
+  #     - name: Download mac wheel py312
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: wheels-mac-py312
+  #         path: dist
+
+  #     - name: Publish package to PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.8.7
+  #       with:
+  #         verbose: true
